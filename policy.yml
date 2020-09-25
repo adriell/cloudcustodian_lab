@@ -1,0 +1,30 @@
+policies:
+  - name: tag-compliance
+    resource: aws.ec2
+    description: |
+      Schedule a resource that does not meet tag compliance policies to be stopped in four days. Note a separate policy using the`marked-for-op` filter is required to actually stop the instances after four days.
+    filters:
+     - State.Name: running
+     - "tag:Environment": absent
+     - "tag:AppId": absent
+
+    actions:
+     - type: terminate
+     - type: terminate
+       force: true 
+     - type: notify
+       template: default
+       priority_header: 1
+       subject: "EC2 Stopped Instance Termination Scheduled! [custodian {{ account }} - {{ region }}]"
+       violation_desc: "EC2(s) have been in a stopped state for 53 days and at 60 days will be termianted:"
+       action_desc: |
+           Your EC2 server will be terminated in 7 days if not started and patched by then.
+           Please start your stopped servers and leave them on for 24 hours minimum to
+           allow for patching to occur.
+       to:
+         - adriell.ads@gmail.com
+
+       transport:
+         type: sqs
+         queue: https://sqs.us-east-1.amazonaws.com/1234567891011/cloud-custodian-mailer
+         region: us-east-1

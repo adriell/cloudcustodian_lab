@@ -1,0 +1,18 @@
+policies:
+  - name: tag-compliance
+    resource: s3
+    description: |
+      Schedule a resource that does not meet tag compliance policies to be stopped in four days. Note a separate policy using the`marked-for-op` filter is required to actually stop the instances after four days.
+    filters:
+     - type: bucket-encryption
+       state: False
+     - tag:bucket-c7n-encripyt: absent
+     - or:
+       - type: cross-account
+       - type: bucket-encryption
+         state: False
+       - tag:bucket-c7n-encripyt: absent
+    actions:
+      - type: tag
+        key: teste-c7n
+        value: ok
